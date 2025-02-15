@@ -45,7 +45,7 @@ def extract_data(file_path):
         print(f"Error: The file '{file_path}' does not exist.")
         return {}
 
-@app.route('/extracted-data', methods=['POST'])
+@app.route('/extract-data', methods=['POST'])
 def extract_data_api():
     file_path = request.json.get('file_path')
     if not file_path:
@@ -62,7 +62,7 @@ if __name__ == '__main__':
     file_path = "data.csv"
     extracted_data = extract_data(file_path)
 
-    # Output results (for demonstration purposes)
+    # printing the output
     if extracted_data:
         print("-" * 40)
         print("Extracted Data:")
