@@ -1,6 +1,6 @@
 Emails:
 user@example.com
-john.doe@company.org
+alain.ngabo@company.org
 support@webmail.com
 alice.smith@edu.edu
 hello@service.net
