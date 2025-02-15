@@ -38,7 +38,7 @@ def read_text_data(file_path="data_file.py"):
     with open(file_path, "r") as file:
         return file.read()
 
-@app.route('/extract', methods=['GET'])
+@app.route('/extract-data', methods=['GET'])
 def extract():
     try:
         # Read text data from the data file
