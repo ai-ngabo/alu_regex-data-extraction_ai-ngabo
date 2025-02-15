@@ -23,7 +23,7 @@ extract.post('/extract', (req, res) => {
   const paragraph = req.body.paragraph || "";
 	let extractedData = {};
 
-	for(const [key, data] of object.entries(regex_patterns)) {
+	for(const [key, data] of Object.entries(regex_patterns)) {
 	  extractedData[key] = paragraph.match(data) || [];
 	}
 
@@ -32,4 +32,4 @@ extract.post('/extract', (req, res) => {
 
 // Runing the server
 const PORT = process.env.PORT || 5000;
-extract.listen(PORT, () => console,log(`Server running on port ${PORT}`)); 
+extract.listen(PORT, () => console.log(`Server running on port ${PORT}`)); 
