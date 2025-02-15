@@ -26,13 +26,14 @@ python3 extract.py
 curl -X POST -H "Content-Type: application/json" -d '{"file_path": "data.csv"}' http://127.0.0.1:5000/extract-data
 ## Project Structure
 ```
-`
+## Project Structure
+```
 data-extraction-api/
  ├── data_file.py       # Contains sample data          
  ├── extract.py         # Main script for running the Flask API and data 
  extraction
  └── README.md          # Project documentation
- `
+ ```
 ## API Endpoints
 */extract-data [GET]
 -*Description*: Extracts data from the provided text file.
@@ -47,6 +48,6 @@ data-extraction-api/
 }
 ```
 ## Contact
-* Name: Alain NGABO
-* Email: a.ngabo@alustudent.com
-* Github: [ai-ngabo](https://github.com/ai-ngabo)
+* **Name**: Alain NGABO
+* **Email**: a.ngabo@alustudent.com
+* **Github**: [ai-ngabo](https://github.com/ai-ngabo)
