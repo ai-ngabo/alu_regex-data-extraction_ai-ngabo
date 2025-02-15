@@ -4,7 +4,7 @@ const path = require('path');
 
 const app = express();
 
-// Regular Expressions
+// regex patterns to extract the targeted data from data.json file
 const regex_patterns = {
   emails: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b/g,
   urls: /https?:\/\/[^\s]+/g,
@@ -18,9 +18,9 @@ const regex_patterns = {
 
 // Endpoint to extract data from JSON file
 app.get('/extract-from-json', (req, res) => {
-  const filePath = path.join(__dirname, 'data.json');
+  const filePath = path.join('data.json');
 
-  fs.readFile(filePath, 'utf8', (err, data) => {
+  fs.readFile(filePath, (err, data) => {
     if (err) {
       return res.status(500).json({ error: "Error reading JSON file" });
     }
@@ -34,15 +34,16 @@ app.get('/extract-from-json', (req, res) => {
       const extractedResults = jsonData.paragraphs.map(paragraph => {
         let extractedData = {};
         for (const [key, pattern] of Object.entries(regex_patterns)) {
-          extractedData[key] = paragraph.match(pattern) || [];
+          extractedData[key] = paragraph.match(pattern);
         }
-        return { paragraph, extractedData };
-      });
+        return extractedData;
 
-      res.json(extractedResults);
-    } catch (parseError) {
-      res.status(500).json({ error: "Error parsing JSON file" });
+      });
+	res.json(extractedResults);
+    } catch (error) {
+      res.status(500).json({ error: "Error parsing JSON" });
     }
+
   });
 });
 
