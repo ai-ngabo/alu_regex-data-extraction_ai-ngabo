@@ -1,35 +1,52 @@
-const express =  require('express');
-const bodyParser = require('body-parser');
+const express = require('express');
+const fs = require('fs');
+const path = require('path');
 
+const app = express();
 
-const extract = express();
-extract.use(bodyParser.json());
-
-
-// Collecting all patterns of Regular expressions to use
+// Regular Expressions
 const regex_patterns = {
-  emails: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g,
-  urls: /https?:\/\/[a-zA-Z0-9.-]+(?:\.[a-zA-Z]{2,})+(?:\/\S*)?/g,
+  emails: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b/g,
+  urls: /https?:\/\/[^\s]+/g,
   phoneNumbers: /(\(\d{3}\)\s?\d{3}[-.]\d{4})|(\d{3}[-.]\d{3}[-.]\d{4})/g,
   creditCards: /\b\d{4}[- ]\d{4}[- ]\d{4}[- ]\d{4}\b/g,
-  time: /\b(?:[01]?\d|2[0-3]):[0-5]\d(?:\s?[APap][Mm])?\b/g,
-  htmlTags: /<\/?[a-zA-Z][a-zA-Z0-9]*\b[^>]*>/g,
-  hashtags: /\B#\w+/g,
-  Currencies: /\$\d{1,3}(?:,\d{3})*(?:\.\d{2})?/g
+  time: /\b(?:[01]?\d|2[0-3]):[0-5]\d(?:\s?[APap][Mm])?\b/g,  
+  hashtags: /#\w+/g,
+  currencies: /\$\d{1,3}(?:,\d{3})*(?:\.\d{2})?/g
 };
 
-// Extracting data through API 
-extract.post('/extract', (req, res) => {
-  const paragraph = req.body.paragraph || "";
-	let extractedData = {};
 
-	for(const [key, data] of Object.entries(regex_patterns)) {
-	  extractedData[key] = paragraph.match(data) || [];
-	}
+// Endpoint to extract data from JSON file
+app.get('/extract-from-json', (req, res) => {
+  const filePath = path.join(__dirname, 'data.json');
 
-	res.json(extractedData);
+  fs.readFile(filePath, 'utf8', (err, data) => {
+    if (err) {
+      return res.status(500).json({ error: "Error reading JSON file" });
+    }
+
+    try {
+      const jsonData = JSON.parse(data);
+      if (!jsonData.paragraphs || !Array.isArray(jsonData.paragraphs)) {
+        return res.status(400).json({ error: "Invalid JSON format" });
+      }
+
+      const extractedResults = jsonData.paragraphs.map(paragraph => {
+        let extractedData = {};
+        for (const [key, pattern] of Object.entries(regex_patterns)) {
+          extractedData[key] = paragraph.match(pattern) || [];
+        }
+        return { paragraph, extractedData };
+      });
+
+      res.json(extractedResults);
+    } catch (parseError) {
+      res.status(500).json({ error: "Error parsing JSON file" });
+    }
+  });
 });
 
-// Runing the server
-const PORT = process.env.PORT || 5000;
-extract.listen(PORT, () => console.log(`Server running on port ${PORT}`)); 
+// Start the server
+const PORT = process.env.PORT || 5080;
+app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
+
