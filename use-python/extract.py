@@ -1,64 +1,60 @@
-#!/usr/bin/python3
-
+from flask import Flask, jsonify
 import re
 
-# Function to read the file and extract data
-def extract_data(file_path):
+app = Flask(__name__)
+
+# Function to extract data from text
+def extract_data(text):
+    # Email extraction
+    email_pattern = r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
+    emails = re.findall(email_pattern, text)
+
+    # URL extraction
+    url_pattern = r"https?:\/\/(?:www\.)?[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\/[^\s]*)?"
+    urls = re.findall(url_pattern, text)
+
+    # Phone number extraction
+    phone_pattern = r"\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}"
+    phones = re.findall(phone_pattern, text)
+
+    # Currency extraction
+    currency_pattern = r"\$\d{1,3}(?:,\d{3})*(?:\.\d{2})?"
+    prices = re.findall(currency_pattern, text)
+
+    # Hashtag extraction
+    hashtag_pattern = r"#\w+"
+    hashtags = re.findall(hashtag_pattern, text)
+
+    return {
+        "emails": emails,
+        "urls": urls,
+        "phones": phones,
+        "prices": prices,
+        "hashtags": hashtags
+    }
+
+# Function to read text from the data file (text_data stored in the file)
+def read_text_data(file_path="data_file.py"):
+    with open(file_path, "r") as file:
+        return file.read()
+
+@app.route('/extract', methods=['GET'])
+def extract():
     try:
-        # Read the text file
-        with open(file_path, "r") as file:
-            text = file.read()
+        # Read text data from the data file
+        text = read_text_data("data_file.py")
+        
+        if not text:
+            return jsonify({"error": "No text data found in the file"}), 400
+        
+        # Extract data from the loaded text
+        extracted_data = extract_data(text)
+        
+        return jsonify(extracted_data)
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-        # Email extraction
-        email_regex = r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
-        emails = re.findall(email_regex, text)
-
-        # URL extraction
-        url_regex = r"https?:\/\/(?:www\.)?[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\/[^\s]*)?"
-        urls = re.findall(url_regex, text)
-
-        # Phone number extraction
-        phone_regex = r"\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}"
-        phones = re.findall(phone_regex, text)
-
-        # Currency extraction
-        currency_regex = r"\$\d{1,3}(?:,\d{3})*(?:\.\d{2})?"
-        prices = re.findall(currency_regex, text)
-
-        # Hashtag extraction
-        hashtag_regex = r"#\w+"
-        hashtags = re.findall(hashtag_regex, text)
-
-        # Return extracted data in a dictionary
-        return {
-            "emails": emails,
-            "urls": urls,
-            "phones": phones,
-            "prices": prices,
-            "hashtags": hashtags
-        }
-
-    except FileNotFoundError:
-        print(f"Error: The file '{file_path}' does not exist.")
-        return {}
-
-# Passing through the path to access the data to use in extraction
-file_path = "data.csv"
-extracted_data = extract_data(file_path)
-
-# Output results (for demonstration purposes)
-if extracted_data:
-    print("Extracted Data:\n----------------------------------------")
-    print("Emails:", extracted_data["emails"])
-    print("URLs:", extracted_data["urls"])
-    print("Phone Numbers:", extracted_data["phones"])
-    print("Prices:", extracted_data["prices"])
-    print("Hashtags:", extracted_data["hashtags"])
-    print("-" * 40)
-    # save results to a new file
-    with open("extracted_data.txt", "w") as output_file:
-        for category, data in extracted_data.items():
-            output_file.write(f"{category.capitalize()}:\n")
-            output_file.write("\n".join(data) + "\n\n")
-
+if __name__ == '__main__':
+    app.run(debug=True)
 
